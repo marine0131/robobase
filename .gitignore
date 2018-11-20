@@ -1,0 +1,6 @@
+*.py[~co]
+*.cpp~
+*.swp
+build
+devel
+
