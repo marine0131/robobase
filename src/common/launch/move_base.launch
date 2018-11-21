@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+	<!-- map_server -->
+  	<node pkg="map_server" name="map_server" type="map_server" args="$(find common)/maps/company_map.yaml" respawn="false" />
+
+	<!-- amcl -->
+  	<include file="$(find xunjian_nav)/launch/amcl.launch" />
+
+	<!-- move_base -->
+  	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
+    	<rosparam file="$(find xunjian_nav)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    	<rosparam file="$(find xunjian_nav)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    	<rosparam file="$(find xunjian_nav)/config/local_costmap_params.yaml" command="load" />
+    	<rosparam file="$(find xunjian_nav)/config/global_costmap_params.yaml" command="load" />
+    	<rosparam file="$(find xunjian_nav)/config/base_local_planner_params.yaml" command="load" />
+    	<!--<rosparam file="$(find xunjian_nav)/config/xunjian_robot/navfn_params.yaml" command="load"/>-->
+  	</node>
+  	
+	<!--*************rotate for initialize ************-->
+	<node pkg="common" name="rotate" type="rotate" output="screen"/>
+	
+</launch>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>  
+	<!--urdf model-->
+    <arg name="model" value="$(find common)/urdf/base.urdf"/>
+	<param name = "robot_description" command="$(find xacro)/xacro.py $(arg model)"/>
+	<param name = "use_gui" value="true"/>
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
+
+
+    <!-- tcp communication -->
+    <!--node name="tcp_comm" pkg="common" type="tcp_comm" output="screen">
+      	<param name="port" type="int" value="24000"/>
+      	<param name="ip" type="string" value="127.0.0.1"/>
+    </node-->
+
+    <!-- sensors publish -->
+    <node name="sonar_pub" pkg="common" type="sonar_pub" output="screen"/>
+    <node name="odometry_pub" pkg="common" type="odometry_pub" output="screen"/>
+
+</launch>
