@@ -7,6 +7,7 @@ ros::Publisher cmd_vel_pub;
 ros::ServiceClient client;
 std_srvs::Empty srv;
 int count=0;
+
 void get_pose_callback(const geometry_msgs::PoseWithCovarianceStamped& pose){
 	geometry_msgs::Twist msg;
 	msg.linear.x = msg.linear.y = msg.linear.z = 0;

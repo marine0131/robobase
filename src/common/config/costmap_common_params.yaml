@@ -1,0 +1,23 @@
+robot_radius: 0.25
+footprint_padding: 0.01
+
+# inflation layer params
+inflation_radius: 0.15 #distance from an obstacle at which costs are incurred for planning paths
+cost_scaling_factor: 8.0  #  default 10 exponential rate at which the obstacle cost drops off 
+
+# these params will apply to all sensors
+obstacle_range: 2.5  # track the obstacle in this range
+raytrace_range: 3.0  # track the free space in this range
+max_obstacle_height: 0.5
+min_obstacle_height: 0.01
+
+
+observation_sources: scan
+scan: {
+    sensor_frame: /laser, 
+    data_type: LaserScan, 
+    topic: /scan, 
+    marking: true,
+    clearing: true,
+    clear_on_max_reading: true,
+    inf_is_valid: true}

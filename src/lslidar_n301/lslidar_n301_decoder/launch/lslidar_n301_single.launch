@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <node pkg="lslidar_n301_driver" type="lslidar_n301_driver_node" name="lslidar_n301_driver_node" output="screen" respawn="true">
+    <param name="frame_id" value="laser_link_single"/>
+    <param name="device_ip" value="192.168.10.18"/>
+    <param name="udp_port" type="int" value="2369"/>
+    <remap from="lslidar_packet" to="lslidar_packet_single"/>
+  </node>
+
+  <node pkg="lslidar_n301_decoder" type="lslidar_n301_decoder_node" name="lslidar_n301_decoder_node" output="screen" respawn="true">
+    <param name="child_frame_id" value="laser_1"/>
+    <param name="angle_min" value="-90"/>
+    <param name="angle_max" value="90"/>
+    <param name="min_range" value="0.3"/>
+    <param name="max_range" value="100.0"/>
+    <param name="frequency" value="15.0"/>
+    <param name="publish_point_cloud" value="false"/>
+    <param name="lslidar_packet" value="lslidar_packet_single"/>
+    <param name="lslidar_sweep" value="lslidar_sweep_single"/>
+    <param name="lslidar_point_cloud" value="lslidar_point_cloud_single"/>
+    <remap from="scan" to="scan_1"/>
+  </node>
+
+</launch>

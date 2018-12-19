@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="lslidar_n301_driver" type="lslidar_n301_driver_node"
+    name="lslidar_n301_driver_node_1">
+    <param name="frame_id" value="laser_1"/>
+    <param name="device_ip" value="192.168.10.12"/>
+  </node>
+</launch>

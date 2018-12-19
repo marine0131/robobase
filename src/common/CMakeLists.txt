@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sensor_msgs
+  geometry_msgs
   nav_msgs
   tf
   message_generation
@@ -88,8 +89,8 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES common
-  CATKIN_DEPENDS message_runtime roscpp rospy nav_msgs std_msgs sensor_msgs 
-  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime roscpp rospy nav_msgs std_msgs sensor_msgs geometry_msgs
+  # DEPENDS system_lib
 )
 
 ###########
@@ -102,6 +103,12 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 
 ## Declare a cpp executable
+add_executable(tcp_comm src/tcp_comm.cpp )
+add_dependencies(tcp_comm Encoder_generate_messages_cpp)
+target_link_libraries(tcp_comm
+   ${catkin_LIBRARIES}
+ )
+
 add_executable(odometry_pub src/odometry_pub.cpp )
 add_dependencies(odometry_pub Encoder_generate_messages_cpp)
 target_link_libraries(odometry_pub

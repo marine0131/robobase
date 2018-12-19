@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<launch>
+    <rosparam file="$(find lslidar_n301_driver)/config/lslidar_config.yaml" command="load"/>
+
+      <include file="$(find lslidar_n301_decoder)/launch/lslidar_n301.launch">
+          <arg name="uid" value="1"/>
+      </include>
+      
+      <include file="$(find lslidar_n301_decoder)/launch/lslidar_n301.launch">
+          <arg name="uid" value="2"/>
+      </include>
+</launch>

@@ -1,0 +1,7 @@
+lslidar_n301_driver_node_1:
+    device_ip: 192.168.10.17
+    udp_port: 2368
+
+lslidar_n301_driver_node_2:
+    device_ip: 192.168.10.18
+    udp_port: 2369

@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<launch>
+  <arg name="uid"/>
+  <node pkg="lslidar_n301_driver" type="lslidar_n301_driver_node" name="lslidar_n301_driver_node_$(arg uid)" output="screen" respawn="true">
+      <param name="frame_id" value="laser_link_$(arg uid)"/>
+    <remap from="lslidar_packet" to="lslidar_packet_$(arg uid)"/>
+  </node>
+
+  <node pkg="lslidar_n301_decoder" type="lslidar_n301_decoder_node" name="lslidar_n301_decoder_node_$(arg uid)" output="screen" respawn="true">
+    <param name="child_frame_id" value="laser_$(arg uid)"/>
+    <!--param name="angle_disable_min" value="0"/>
+    <param name="angle_disable_max" value="0"/-->
+    <param name="min_range" value="0.3"/>
+    <param name="max_range" value="100.0"/>
+    <param name="frequency" value="15.0"/>
+    <param name="publish_point_cloud" value="false"/>
+    <param name="lslidar_packet" value="lslidar_packet_$(arg uid)"/>
+    <param name="lslidar_sweep" value="lslidar_sweep_$(arg uid)"/>
+    <!--param name="lslidar_point_cloud" value="lslidar_point_cloud_$(arg uid)"/-->
+    <remap from="scan" to="scan_$(arg uid)"/>
+  </node>
+</launch>
