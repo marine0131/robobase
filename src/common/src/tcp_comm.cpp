@@ -110,7 +110,7 @@ static uchar parse_stm_data(uchar cmd, const uchar data[], uchar len)
 			imu_data.orientation.z = ((data[32] << 24) | (data[33] << 16) | (data[34] << 8) | data[35])/Q30;
 			imu_data.orientation.w = ((data[36] << 24) | (data[37] << 16) | (data[38] << 8) | data[39])/Q30;
 			
-            ROS_INFO("cmd: %x", cmd);
+            //ROS_INFO("cmd: %x", cmd);
 			return IMU_ID;
 		}
 		
@@ -119,13 +119,13 @@ static uchar parse_stm_data(uchar cmd, const uchar data[], uchar len)
 			if(len != ENCODER_DATA_LEN)
 				return 0;
 			//左右电机编码数
-			motor_encoder.leftEncoder = (data[0] << 24) | (data[1] << 16) | (data[2] << 16) | data[3];
-			motor_encoder.leftEncoder = (data[4] << 24) | (data[5] << 16) | (data[6] << 16) | data[7];
+			motor_encoder.leftEncoder = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
+			motor_encoder.rightEncoder = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
 			//线速度与角速度
 			motor_encoder.vx = (data[10] << 8) | data[11];
 			motor_encoder.w = (data[14] << 8) | data[15];
 		
-            ROS_INFO("cmd: %x", cmd);
+            // ROS_INFO("cmd: %x", cmd);
 			return ENCODER_ID;
 		}
 		
@@ -139,7 +139,7 @@ static uchar parse_stm_data(uchar cmd, const uchar data[], uchar len)
 				sonar_data.data.push_back(data[4*i + 3]);
 			}
 			
-            ROS_INFO("cmd: %x", cmd);
+            // ROS_INFO("cmd: %x", cmd);
 			return SONAR_ID;
 		}
 	}
@@ -151,17 +151,17 @@ static void publish_stm_data(uchar msg_id)
 	switch (msg_id)
 	{
 		case IMU_ID:
-			ROS_INFO("pub imu");
+			//ROS_INFO("pub imu");
 			imu_pub.publish(imu_data);
 			break;
 
 		case ENCODER_ID:
-			ROS_INFO("pub encoder");
+			//ROS_INFO("pub encoder");
             encoder_pub.publish(motor_encoder);
 			break;
 
 		case SONAR_ID:
-			ROS_INFO("pub sonar");
+			//ROS_INFO("pub sonar");
 			sonar_pub.publish(sonar_data);
 			break;
 			
@@ -180,7 +180,7 @@ int main(int argc, char **argv)
 	sonar_pub = handle.advertise<std_msgs::UInt16MultiArray>("sonar", 10);
 	imu_pub = handle.advertise<sensor_msgs::Imu>("imu", 10);
 
-	smooth_sub = handle.subscribe("smoother_cmd_vel", 1, smoother_callback);
+	smooth_sub = handle.subscribe("cmd_vel", 1, smoother_callback);
 	enco_reset_sub = handle.subscribe("encoder_reset", 1, encoder_reset_callback);
 
 	/* create thread for two subscribe */
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
 
 	struct sockaddr_in myaddr, peeraddr;
 	myaddr.sin_family=AF_INET;
-	myaddr.sin_port=htons(50000);
+	myaddr.sin_port=htons(24000);
 	myaddr.sin_addr.s_addr=inet_addr("0.0.0.0");
 
 	if(bind(sockfd,(struct sockaddr*)&myaddr,sizeof(myaddr)) < 0)
@@ -245,8 +245,9 @@ int main(int argc, char **argv)
 			{
 				perror("recv");
 				close(confd);
-				close(sockfd);
-				exit(1);
+				// close(sockfd);
+				// exit(1);
+				break;
 			}
 			else if(ret_recv == 0)
 			{
