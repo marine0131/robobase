@@ -12,6 +12,7 @@
 std::vector<sensor_msgs::Range> sonar_array;
 
 void range_callback(const std_msgs::UInt16MultiArray& ut){
+    ROS_INFO("sonar called");
     for(size_t i = 0; i < ut.data.size(); ++i){
         float u=(float)ut.data[i]/100.0f;
         sonar_array[i].range = u;//>ultra_msg1.max_range?ultra_msg1.max_range:u1;
@@ -21,7 +22,7 @@ void range_callback(const std_msgs::UInt16MultiArray& ut){
 int main(int argc, char **argv){
 	ros::init(argc,argv,"sonar_pub");
 	ros::NodeHandle nh;
-	ros::Subscriber range_msg = nh.subscribe("sonar", 1000, range_callback); //subscribe ultra data set
+	ros::Subscriber range_msg = nh.subscribe("sonar", 5, range_callback); //subscribe ultra data set
 	ros::Publisher range_pub = nh.advertise<sensor_msgs::Range>("range",20);
 	
 	ros::Rate loop_rate(20);

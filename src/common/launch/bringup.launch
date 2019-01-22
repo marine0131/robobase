@@ -4,8 +4,25 @@
     <arg name="model" value="$(find common)/urdf/base.urdf"/>
 	<param name = "robot_description" command="$(find xacro)/xacro.py $(arg model)"/>
 	<param name = "use_gui" value="true"/>
-	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
+        <!--param name="publish_frequency" value="20.0" /-->
+    </node>
 
+    <!-- laser -->
+    <node pkg="lslidar_n301_driver" type="lslidar_n301_driver_node" name="lslidar_n301_driver_node" output="screen" respawn="false">
+        <param name="device_ip" value="192.168.10.17"/>
+        <param name="udp_port" value="2368"/>
+    </node>
+    <node pkg="lslidar_n301_decoder" type="lslidar_n301_decoder_node" name="lslidar_n301_decoder_node" output="screen" respawn="false">
+        <param name="child_frame_id" value="laser"/>                     
+        <param name="angle_min" value="-90"/>                              
+        <param name="angle_max" value="90"/>                               
+        <param name="min_range" value="0.1"/>
+        <param name="max_range" value="50.0"/>
+        <param name="frequency" value="15.0"/>
+        <param name="publish_point_cloud" value="false"/>
+        <remap from="scan" to="scan"/>   
+    </node>
 
     <!-- tcp communication -->
     <node name="tcp_comm" pkg="common" type="tcp_comm" output="screen">
@@ -13,7 +30,9 @@
     </node>
 
     <!-- sensors publish -->
-    <node name="sonar_pub" pkg="common" type="sonar_pub" output="screen"/>
-    <node name="odometry_pub" pkg="common" type="odometry_pub" output="screen"/>
+    <!--node name="sonar_pub" pkg="common" type="sonar_pub" output="screen"/-->
+    <node name="odometry_pub" pkg="common" type="odometry_pub" output="screen">
+        <remap from="odom" to="odom_raw" />
+    </node>
 
 </launch>
