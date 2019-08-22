@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>  
-    <node name="tcp_comm" pkg="common" type="tcp_comm" output="screen">
-      	<param name="port" type="int" value="24000"/>
-      	<param name="ip" type="string" value="127.0.0.1"/>
-    </node>
+    <node name="tcp_comm" pkg="common" type="tcp_comm" output="screen"/>
+
 
 </launch>
