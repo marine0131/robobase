@@ -8,13 +8,16 @@
 
 
     <!-- tcp communication -->
-    <!--node name="tcp_comm" pkg="common" type="tcp_comm" output="screen">
+    <node name="tcp_comm" pkg="common" type="tcp_comm" output="screen">
       	<param name="port" type="int" value="24000"/>
       	<param name="ip" type="string" value="127.0.0.1"/>
-    </node-->
+    </node>
 
     <!-- sensors publish -->
     <node name="sonar_pub" pkg="common" type="sonar_pub" output="screen"/>
     <node name="odometry_pub" pkg="common" type="odometry_pub" output="screen"/>
+
+    <!-- pose ekf -->
+  	<include file="$(find robot_pose_ekf)/robot_pose_ekf.launch" />
 
 </launch>
