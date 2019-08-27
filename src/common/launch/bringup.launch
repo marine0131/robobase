@@ -26,6 +26,8 @@
 
     <!-- tcp communication -->
     <node name="tcp_comm" pkg="common" type="tcp_comm" output="screen">
+      	<param name="port" type="int" value="24000"/>
+      	<param name="ip" type="string" value="127.0.0.1"/>
       	<remap from="cmd_vel" to="cmd_vel"/>
     </node>
 
@@ -34,5 +36,8 @@
     <node name="odometry_pub" pkg="common" type="odometry_pub" output="screen">
         <remap from="odom" to="odom_raw" />
     </node>
+
+    <!-- pose ekf -->
+  	<include file="$(find robot_pose_ekf)/robot_pose_ekf.launch" />
 
 </launch>
