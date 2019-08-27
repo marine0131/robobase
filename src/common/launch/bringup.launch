@@ -37,7 +37,4 @@
         <remap from="odom" to="odom_raw" />
     </node>
 
-    <!-- pose ekf -->
-  	<include file="$(find robot_pose_ekf)/robot_pose_ekf.launch" />
-
 </launch>
