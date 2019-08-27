@@ -16,6 +16,9 @@ encoder data,but from the known velocity of mobile robots.
 
 common::Encoder enc;
 
+float odom_linear_scale_correction = 1;
+float odom_angular_scale_correction = 1;
+
 void sensorMsg_Callback(const common::Encoder& msg){
     enc.leftEncoder=msg.leftEncoder;
     enc.rightEncoder=msg.rightEncoder;
@@ -29,7 +32,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	
 	ros::Subscriber sensor_sub=n.subscribe("encoder",1,sensorMsg_Callback);
-	ros::Publisher odom_pub=n.advertise<nav_msgs::Odometry>("odom_raw", 50); //publiser  raw odom
+	ros::Publisher odom_pub=n.advertise<nav_msgs::Odometry>("odom", 50); //publiser  raw odom
 #ifndef ODOM_COMBINE
 	tf::TransformBroadcaster odom_broadcaster; // define /odom -> /base_link tf broadcaster
 #endif
@@ -46,7 +49,7 @@ int main(int argc, char **argv)
 	ros::Time current_time,last_time;
 	current_time=ros::Time::now();
 	last_time=ros::Time::now();
-	ros::Rate rate(20);// odom publish frequency
+	ros::Rate rate(30);// odom publish frequency, default: 20
 
     while(n.ok())
     {
@@ -56,21 +59,24 @@ int main(int argc, char **argv)
 
         //ROS_INFO("right left: [%d,%d,%d,%d]",enc.right_enc, enc.left_enc);
 	
-        vx = (float)enc.vx/1000.0;
-        w =  (float)enc.w/1000.0;
+        vx = (float)enc.vx/1000.0 * odom_linear_scale_correction;
+        w =  (float)enc.w/1000.0 * odom_angular_scale_correction;
+        // ROS_INFO("odom_pub: [vx: %f, w: %f]", vx, w);
         x += vx*cos(th)*dt;
         y += vx*sin(th)*dt;
         th += w*dt;
         //ROS_INFO("Yaw angle: %f",th*180.0/M_PI);
         while(th >= M_PI)  th -= 2*M_PI;
         while(th <= -M_PI)  th += 2*M_PI;
-        ROS_INFO("Yaw: %f degree",th*180.0/M_PI);
+        //ROS_INFO("Yaw: %f degree",th*180.0/M_PI);
 
         //get quaterion from yaw, (generated from encoder)
         geometry_msgs::Quaternion odom_quat=tf::createQuaternionMsgFromYaw(th);
 
         // first, publish the transform over tf, do not publish if odom combine needed
+        nav_msgs::Odometry odom;
 #ifndef ODOM_COMBINE
+        //not use ekf
         geometry_msgs::TransformStamped odom_trans;
         odom_trans.header.stamp = current_time;
         odom_trans.header.frame_id = "odom";
@@ -80,10 +86,38 @@ int main(int argc, char **argv)
         odom_trans.transform.translation.z = 0.0;
         odom_trans.transform.rotation = odom_quat;
         odom_broadcaster.sendTransform(odom_trans);
+        odom.pose.covariance = boost::assign::list_of(0.1) (0) (0) (0) (0) (0)
+			                                       (0) (0.1) (0) (0) (0) (0)
+												   (0) (0) (1e5) (0) (0) (0)
+												   (0) (0) (0) (1e5) (0) (0)
+												   (0) (0) (0) (0) (1e5) (0)
+												   (0) (0) (0) (0) (0) (0.05);
+
+        odom.twist.covariance = boost::assign::list_of(0.001) (0) (0) (0) (0) (0)
+			                                      (0) (0.001) (0) (0) (0) (0)
+												  (0) (0) (1e5) (0) (0) (0)
+												  (0) (0) (0) (1e5) (0) (0)
+                                                  (0) (0) (0) (0) (1e5) (0)
+												  (0) (0) (0) (0) (0) (0.01);
+#else
+        
+        odom.pose.covariance = boost::assign::list_of(1e-3) (0) (0) (0) (0) (0)
+			                                       (0) (1e-3) (0) (0) (0) (0)
+												   (0) (0) (1e5) (0) (0) (0)
+												   (0) (0) (0) (1e5) (0) (0)
+												   (0) (0) (0) (0) (1e5) (0)
+												   (0) (0) (0) (0) (0) (1e2);
+        
+        odom.twist.covariance = boost::assign::list_of(1e-3) (0) (0) (0) (0) (0)
+			                                      (0) (1e-3) (0) (0) (0) (0)
+												  (0) (0) (1e5) (0) (0) (0)
+												  (0) (0) (0) (1e5) (0) (0)
+                                                  (0) (0) (0) (0) (1e5) (0)
+												  (0) (0) (0) (0) (0) (1e2);
+                                         
 #endif
 
         // next, publish the odom message
-        nav_msgs::Odometry odom;
         odom.header.stamp = current_time;
         odom.header.frame_id = "odom";
 
@@ -92,23 +126,14 @@ int main(int argc, char **argv)
         odom.pose.pose.position.y = y;
         odom.pose.pose.position.z = 0.0;
         odom.pose.pose.orientation = odom_quat;
-        odom.pose.covariance = boost::assign::list_of(0.1) (0) (0) (0) (0) (0)
-			                                       (0) (0.1) (0) (0) (0) (0)
-												   (0) (0) (1e5) (0) (0) (0)
-												   (0) (0) (0) (1e5) (0) (0)
-												   (0) (0) (0) (0) (1e5) (0)
-												   (0) (0) (0) (0) (0) (0.05);
+        
+
         // set velocity
         odom.child_frame_id = "base_link";
         odom.twist.twist.linear.x = vx;
         odom.twist.twist.linear.y = 0.0;
         odom.twist.twist.angular.z = w;
-        odom.twist.covariance = boost::assign::list_of(0.001) (0) (0) (0) (0) (0)
-			                                      (0) (0.001) (0) (0) (0) (0)
-												  (0) (0) (1e5) (0) (0) (0)
-												  (0) (0) (0) (1e5) (0) (0)
-                                                  (0) (0) (0) (0) (1e5) (0)
-												  (0) (0) (0) (0) (0) (0.01);
+        
         odom_pub.publish(odom);
         last_time=current_time; 
         rate.sleep();

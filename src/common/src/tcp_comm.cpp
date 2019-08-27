@@ -12,6 +12,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <boost/assign/list_of.hpp>
 
 using namespace std;
 
@@ -67,7 +68,7 @@ static void smoother_callback(const geometry_msgs::Twist::ConstPtr &msg)
 		int linear_x = (msg->linear.x)*1000;
 		int angular_z = (msg->angular.z)*1000;
 
-        ROS_INFO("l_x: %d, a_z: %d", linear_x, angular_z);
+        // ROS_INFO("l_x: %d, a_z: %d", linear_x, angular_z);
 		
         memcpy(&buf_geom[5], &linear_x, sizeof(linear_x));
 		memcpy(&buf_geom[9], &angular_z, sizeof(angular_z));
@@ -105,12 +106,21 @@ static uchar parse_stm_data(uchar cmd, const uchar data[], uchar len)
 			imu_data.linear_acceleration.y = ((data[16] << 24) | (data[17] << 16) | (data[18] << 8) | data[19])/65536.0*16.0*9.8;
 			imu_data.linear_acceleration.z = ((data[20] << 24) | (data[21] << 16) | (data[22] << 8) | data[23])/65536.0*16.0*9.8;
 			//四元数位姿
-			imu_data.orientation.x = ((data[24] << 24) | (data[25] << 16) | (data[26] << 8) | data[27])/Q30;
-			imu_data.orientation.y = ((data[28] << 24) | (data[29] << 16) | (data[30] << 8) | data[31])/Q30;
-			imu_data.orientation.z = ((data[32] << 24) | (data[33] << 16) | (data[34] << 8) | data[35])/Q30;
-			imu_data.orientation.w = ((data[36] << 24) | (data[37] << 16) | (data[38] << 8) | data[39])/Q30;
-			
-            //ROS_INFO("cmd: %x", cmd);
+			imu_data.orientation.w = ((data[24] << 24) | (data[25] << 16) | (data[26] << 8) | data[27])/Q30;
+			imu_data.orientation.x = ((data[28] << 24) | (data[29] << 16) | (data[30] << 8) | data[31])/Q30;
+			imu_data.orientation.y = ((data[32] << 24) | (data[33] << 16) | (data[34] << 8) | data[35])/Q30;
+			imu_data.orientation.z = ((data[36] << 24) | (data[37] << 16) | (data[38] << 8) | data[39])/Q30;
+		    // Define imu orientation covariance
+            imu_data.orientation_covariance = boost::assign::list_of(0.05) (0) (0) 
+                                                                    (0) (0.05) (0) 
+                                                                    (0) (0) (0.05);
+            imu_data.angular_velocity_covariance = boost::assign::list_of(0.025) (0) (0) 
+                                                                         (0) (0.025) (0) 
+                                                                         (0) (0) (0.025);
+            imu_data.linear_acceleration_covariance = boost::assign::list_of(0.1) (0) (0) 
+                                                                         (0) (0.1) (0) 
+                                                                         (0) (0) (0.1);
+            // ROS_INFO("cmd: %x", cmd);
 			return IMU_ID;
 		}
 		
@@ -122,8 +132,8 @@ static uchar parse_stm_data(uchar cmd, const uchar data[], uchar len)
 			motor_encoder.leftEncoder = (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
 			motor_encoder.rightEncoder = (data[4] << 24) | (data[5] << 16) | (data[6] << 8) | data[7];
 			//线速度与角速度
-			motor_encoder.vx = (data[10] << 8) | data[11];
-			motor_encoder.w = (data[14] << 8) | data[15];
+			motor_encoder.vx = (short)((data[10] << 8) | data[11]);
+			motor_encoder.w = (short)((data[14] << 8) | data[15]);
 		
             // ROS_INFO("cmd: %x", cmd);
 			return ENCODER_ID;
@@ -136,7 +146,7 @@ static uchar parse_stm_data(uchar cmd, const uchar data[], uchar len)
 			//6个超声波数据
 			for(int i = 0; i < 6; i++)
 			{
-				sonar_data.data.push_back(data[4*i + 3]);
+				sonar_data.data[i] = data[4*i + 3] | (data[4*i + 2] << 8);
 			}
 			
             // ROS_INFO("cmd: %x", cmd);
@@ -189,6 +199,8 @@ int main(int argc, char **argv)
 
 	init_send_buff();
 
+    sonar_data.data.resize(6);
+
 	/* tcp server set up*/
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if(sockfd < 0)
@@ -214,7 +226,7 @@ int main(int argc, char **argv)
 	listen(sockfd, 1);
 
 	socklen_t len=sizeof(peeraddr);
-	while(1)
+	while(ros::ok())
 	{
 		memset(&peeraddr, 0, sizeof(peeraddr));
 
@@ -236,13 +248,14 @@ int main(int argc, char **argv)
 
 		static uchar recvbuf[DATASIZE] = {0};
 		static uchar buf_tmp[DATASIZE] = {0};
-		while(1)
+		while(ros::ok())
 		{
 			memset(&buf_tmp, 0, recv_len);
 
 			ret_recv = recv(confd, &buf_tmp, recv_len, 0);
 			if(ret_recv < 0)
 			{
+				tcp_state_ok = 0;
 				perror("recv");
 				close(confd);
 				// close(sockfd);
