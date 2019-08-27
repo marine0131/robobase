@@ -146,7 +146,7 @@ static uchar parse_stm_data(uchar cmd, const uchar data[], uchar len)
 			//6¸ö³¬Éù²¨Êı¾İ
 			for(int i = 0; i < 6; i++)
 			{
-				sonar_data.data[i] = data[4*i + 3];
+				sonar_data.data[i] = data[4*i + 3] | (data[4*i + 2] << 8);
 			}
 			
             // ROS_INFO("cmd: %x", cmd);

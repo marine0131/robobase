@@ -1,17 +1,17 @@
 global_costmap:
-    # global_frame: /map
-    # robot_base_frame: /base_link
+    global_frame: /map
+    robot_base_frame: /base_link
     update_frequency: 1.0 
-    publish_frequency: 1.0
-    transform_tolerance: 1.0
+    publish_frequency: 0.0
+    transform_tolerance: 0.2
     height: 10.0
     width: 10.0
     origin_x: 0.0
     origin_y: 0.0
     resolution: 0.05
-    # static_map: true
-    # rolling_window: false  #when static_map=true，rolling_window need to be set false
-    # map_type: costmap
+    static_map: true
+    rolling_window: false  #when static_map=true，rolling_window need to be set false
+    map_type: costmap
 
     plugins:
         - {name: static_layer, type: "costmap_2d::StaticLayer"}
@@ -23,7 +23,7 @@ global_costmap:
         unknown_cost_value: -1
         lethal_cost_threshold: 100
         map_topic: "map"
-        first_map_only: false
+        first_map_only: true
         subscribe_to_updates: false
         track_unknown_space: true
         use_maximum: false

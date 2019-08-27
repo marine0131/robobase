@@ -1,10 +1,10 @@
 # base_global_planner: global_planner/GlobalPlanner
 GlobalPlanner:  # Also see: http://wiki.ros.org/global_planner
-# allow_unknown: false  # Allow planner to plan through unknown space, default true
-# default_tolerance: 0.0  # If goal in obstacle, plan to the closest point in radius default_tolerance, default 0.0
-# visualize_potential: false  # Specifies whether or not to visualize the potential area computed via a PointCloud2.
-# use_dijkstra: true  # Use dijkstra's algorithm. Otherwise, A*, default true
-# use_quadratic: true  # Use the quadratic approximation of the potential. Otherwise, use a simpler calculation, default true
+    allow_unknown: false  # Allow planner to plan through unknown space, default true
+    default_tolerance: 0.0  # If goal in obstacle, plan to the closest point in radius default_tolerance, default 0.0
+    visualize_potential: false  # Specifies whether or not to visualize the potential area computed via a PointCloud2.
+    use_dijkstra: true  # Use dijkstra's algorithm. Otherwise, A*, default true
+    use_quadratic: true  # Use the quadratic approximation of the potential. Otherwise, use a simpler calculation, default true
     lethal_cost: 253  # default 253
     neutral_cost: 66  # default 50
     cost_factor: 0.55  # Factor to multiply each cost from costmap by, default 3.0

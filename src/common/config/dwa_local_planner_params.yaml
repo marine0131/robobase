@@ -3,19 +3,22 @@ DWAPlannerROS:
     # vel
     max_trans_vel: 0.5 # choose slightly less than the base's capability
     min_trans_vel: 0.03 # this is min trans velocity when there is negligible rotational vel
-    max_vel_x: 0.5 # 0.55
+    # Warning!
+    # do not set min_trans_vel to 0.0 otherwise dwa will always think translational velocities
+    # are non-negligible and small in place rotational velocities will be created.
+    max_vel_x: 0.4 # 0.55
     min_vel_x: 0.0
     max_vel_y: 0  # diff drive robot
     min_vel_y: 0  # diff drive robot
-    max_rot_vel: 1.2 # choose slightly less than the base's capability
-    min_rot_vel: 0.12  # this is min angular velocity when there is negligible translational vel
+    max_rot_vel: 1.0 # choose slightly less than the base's capability
+    min_rot_vel: 0.2  # this is min angular velocity when there is negligible translational vel
     # acc
-    acc_lim_x: 1.5  # 2.5 
+    acc_lim_x: 0.5  # 2.5 
     acc_lim_y: 0      # diff drive robot
-    acc_lim_theta: 2.0  # 3.2
-    acc_limit_trans: 1.5
+    acc_lim_theta: 0.8  # 3.2
+    acc_limit_trans: 0.5
 
-    trans_stopped_vel: 0.03
+    trans_stopped_vel: 0.05
     rot_stopped_vel: 0.12
 
     # # Warning!
@@ -26,17 +29,17 @@ DWAPlannerROS:
     # Goal Tolerance Parameters
     xy_goal_tolerance: 0.10  # 0.10
     yaw_goal_tolerance: 0.08  # 0.05
-    # latch_xy_goal_tolerance: false
+    latch_xy_goal_tolerance: true
 
     # Forward Simulation Parameters
     sim_time: 2.5       # 1.7
     sim_granularity: 0.025 # The step size, in meters, to take between points on a given trajectory,default: 0.025
-    angular_sim_granularity: 0.1
+    angular_sim_granularity: 0.025
 
     # Trajectory Scoring Parameters
-    path_distance_bias: 32.0      # 32.0   - weighting for how much it should stick to the global path plan
-    goal_distance_bias: 24.0      # 24.0   - wighting for how much it should attempt to reach its goal
-    occdist_scale: 0.01           # 0.01   - weighting for how much the controller should avoid obstacles
+    path_distance_bias: 35.0      # 32.0   - weighting for how much it should stick to the global path plan
+    goal_distance_bias: 20.0      # 24.0   - wighting for how much it should attempt to reach its goal
+    occdist_scale: 0.02           # 0.01   - weighting for how much the controller should avoid obstacles
     twirling_scale: 0.0   # 0.0 - weighting for penalizing any changes in robot heading
     stop_time_buffer: 0.2         # 0.2    - amount of time a robot must stop in before colliding for a valid traj.
     # # Oscillation Prevention Parameters
@@ -47,9 +50,9 @@ DWAPlannerROS:
     scaling_speed: 0.25           # 0.25   - absolute velocity at which to start scaling the robot's footprint
     max_scaling_factor: 0.2       # 0.2    - how much to scale the robot's footprint when at speed.
 
-    vx_samples: 15       # 3
+    vx_samples: 20       # 3
     vy_samples: 1      # diff drive robot, there is only one sample
-    vth_samples: 35     # 20
+    vth_samples: 40     # 20
 
     prune_plan: true
-    # global_frame: odom
+    global_frame: odom
